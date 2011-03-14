@@ -1,0 +1,117 @@
+TC(8)                                                                     Linux                                                                     TC(8)
+
+
+
+NOMBRE
+       tc - muestra / manipula la contiguración del control de tráfico
+
+SINOPSIS
+       tc qdisc [ add | change | replace | link ] dev DEV [ parent qdisc-id | root ] [ handle qdisc-id ] qdisc [ qdisc specific parameters ]
+
+       tc class [ add | change | replace ] dev DEV parent qdisc-id [ classid class-id ] qdisc [ qdisc specific parameters ]
+
+       tc  filter  [ add | change | replace ] dev DEV [ parent qdisc-id | root ] protocol protocol prio priority filtertype [ filtertype specific parame‐
+       ters ] flowid flow-id
+
+       tc [ FORMAT ] qdisc show [ dev DEV ]
+
+       tc [ FORMAT ] class show dev DEV
+
+       tc filter show dev DEV
+
+FORMATO := { -s[estadísticas] | -d[detalles] | -r[aw] | -p[retty] | i[ec] }
+
+
+DESCRIPCIÓN
+       Tc es usado para configurar el Control de Tráfico en el kernel de Linux. El Control de Tráfico consiste en lo siguiente:
+
+
+       MODELADO
+              Cuando el tráfico está modelado, su tasa de transmisión está bajo control. El modelado puede consistir en algo más que reducir el ancho de banda disponible
+              - también se utiliza para suavizar los picos de tráfico para un mejor comportamiento de la red. El modelado se hace efectivo en el tráfico de salida.
+
+
+       PROGRAMACIÓN
+              Mediante la programación de la transmisión de paquetes es posible mejorar la interactividad para el tráfico que la necesita sin dejar de garantizar
+              ancho de banda para otras transferencias a granel. La reordenación es también llamada priorización y también ocurre sólo para el tráfico de salida.
+
+
+       POLÍTICA
+              Cuando el modelado se ocupa de la transmisión de tráfico, la política corresponde al tráfico entrante. Por lo tanto, la política aparece en el tráfico entrante.
+
+
+       REDUCCIÓN
+              El tráfico excedente a un ancho de banda establecido puede también ser reducido en el acto, tanto en el tráfico entrante como en el saliente.
+
+
+       El procesamiento del tráfico está controlado por tres tipos de objetos: los qdiscs, las clases y los filtros.
+
+
+QDISCS
+       qdisc es la abreviatura de "queueing discipline" (colas de disciplina) y es fundamental para comprender el control del tráfico. Cuando el kernel necesita enviar un
+       paquete a una interfaz, este es encolado en el qdisc configurado para esa interfaz. Inmediatamente después, el kernel trata de obtener tantos paquetes como le sea
+       posible de la qdisc, para dárselos después al driver del adaptador de red.
+
+       Una QDISC simple es una "pfifo", que no realiza ningún procesamiento y se limita a implementar una cola FIFO (first in, first out). Lo hace, sin embargo,
+       almacenando tráfico cuando la interfaz de red no lo puede manejar momentáneamente.
+
+
+CLASES
+       Some  qdiscs  can  contain  classes,  which contain further qdiscs - traffic may then be enqueued in any of the inner qdiscs, which are within the
+       classes.  When the kernel tries to dequeue a packet from such a classful qdisc it can come from any of the classes. A qdisc may for example prior‐
+       itize certain kinds of traffic by trying to dequeue from certain classes before others.
+
+
+FILTROS
+       A  filter  is used by a classful qdisc to determine in which class a packet will be enqueued. Whenever traffic arrives at a class with subclasses,
+       it needs to be classified. Various methods may be employed to do so, one of these are the filters. All filters attached to the class  are  called,
+       until one of them returns with a verdict. If no verdict was made, other criteria may be available. This differs per qdisc.
+
+       It is important to notice that filters reside within qdiscs - they are not masters of what happens.
+
+
+CLASSLESS QDISCS
+       The classless qdiscs are:
+
+       [p|b]fifo
+              Simplest usable qdisc, pure First In, First Out behaviour. Limited in packets or in bytes.
+
+       pfifo_fast
+              Standard  qdisc  for  'Advanced  Router' enabled kernels. Consists of a three-band queue which honors Type of Service flags, as well as the
+              priority that may be assigned to a packet.
+
+       red    Random Early Detection simulates physical congestion by randomly dropping packets when nearing configured bandwidth allocation. Well suited
+              to very large bandwidth applications.
+
+       sfq    Stochastic Fairness Queueing reorders queued traffic so each 'session' gets to send a packet in turn.
+
+       tbf    The Token Bucket Filter is suited for slowing traffic down to a precisely configured rate. Scales well to large bandwidths.
+
+CONFIGURING CLASSLESS QDISCS
+       In the absence of classful qdiscs, classless qdiscs can only be attached at the root of a device. Full syntax:
+
+       tc qdisc add dev DEV root QDISC QDISC-PARAMETERS
+
+       To remove, issue
+
+       tc qdisc del dev DEV root
+
+       The pfifo_fast qdisc is the automatic default in the absence of a configured qdisc.
+
+
+CLASSFUL QDISCS
+       The classful qdiscs are:
+
+       CBQ    Class  Based  Queueing  implements a rich linksharing hierarchy of classes.  It contains shaping elements as well as prioritizing capabili‐
+              ties. Shaping is performed using link idle time calculations based on average packet size and underlying link bandwidth. The latter may  be
+              ill-defined for some interfaces.
+
+       HTB    The  Hierarchy  Token  Bucket  implements a rich linksharing hierarchy of classes with an emphasis on conforming to existing practices. HTB
+              facilitates guaranteeing bandwidth to classes, while also allowing specification of upper limits to inter-class sharing. It contains  shap‐
+              ing elements, based on TBF and can prioritize classes.
+
+       PRIO   The  PRIO qdisc is a non-shaping container for a configurable number of classes which are dequeued in order. This allows for easy prioriti‐
+              zation of traffic, where lower classes are only able to send if higher ones have no packets available. To facilitate configuration, Type Of
+              Service bits are honored by default.
+
+
