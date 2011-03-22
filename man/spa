@@ -3,7 +3,7 @@ TC(8)                                                                     Linux 
 
 
 NOMBRE
-       tc - muestra / manipula la contiguración del control de tráfico
+       tc - muestra / manipula la configuración del control de tráfico
 
 SINOPSIS
        tc qdisc [ add | change | replace | link ] dev DEV [ parent qdisc-id | root ] [ handle qdisc-id ] qdisc [ qdisc specific parameters ]
@@ -33,7 +33,7 @@ DESCRIPCIÓN
 
        PROGRAMACIÓN
               Mediante la programación de la transmisión de paquetes es posible mejorar la interactividad para el tráfico que la necesita sin dejar de garantizar
-              ancho de banda para otras transferencias a granel. La reordenación es también llamada priorización y también ocurre sólo para el tráfico de salida.
+              el ancho de banda para otras transferencias. La reordenación es también llamada priorización y también ocurre sólo para el tráfico de salida.
 
 
        POLÍTICA
@@ -57,37 +57,38 @@ QDISCS
 
 
 CLASES
-       Some  qdiscs  can  contain  classes,  which contain further qdiscs - traffic may then be enqueued in any of the inner qdiscs, which are within the
-       classes.  When the kernel tries to dequeue a packet from such a classful qdisc it can come from any of the classes. A qdisc may for example prior‐
-       itize certain kinds of traffic by trying to dequeue from certain classes before others.
+       Algunas qdiscs pueden contener clases, que contienen más qdiscs - el tráfico puede entonces ser encolado en alguna de las qdiscs internas,
+       que están dentro de otras clases.  Cuando el kernel intenta desencolar un paquete de una qdisc con clase, este puede provenir de cualquiera de las clases.
+       Una qdisc puede, por ejemplo, priorizar cierto tipo de tráfico mediante el desencolado de unas clases antes que de otras.
 
 
 FILTROS
-       A  filter  is used by a classful qdisc to determine in which class a packet will be enqueued. Whenever traffic arrives at a class with subclasses,
-       it needs to be classified. Various methods may be employed to do so, one of these are the filters. All filters attached to the class  are  called,
-       until one of them returns with a verdict. If no verdict was made, other criteria may be available. This differs per qdisc.
+       Un filtro es utilizado por una qdisc con clase para determinar en qué clase será encolado un paquete. Siempre que el tráfico llega de una clase con subclases,
+       este necesita ser clasificado. Varios métodos pueden ser empleados para ello. Uno de ellos son los filtros. Todos los filtros asociados a la clase son llamados,
+       hasta que uno de ellos regresa con una veredicto. Si no hay veredicto, otros criterios pueden estar disponibles. Esto difiere por cada qdisc.
 
-       It is important to notice that filters reside within qdiscs - they are not masters of what happens.
+       Es importante tener en cuenta que los filtros residen dentro de las qdisc - estos no son dueños de lo que sucede.
 
 
-CLASSLESS QDISCS
-       The classless qdiscs are:
+QDISCS SIN CLASE
+       Las qdiscs sin clase son:
 
        [p|b]fifo
-              Simplest usable qdisc, pure First In, First Out behaviour. Limited in packets or in bytes.
+              Son las qdiscs más simples. Tienen un comportamiento FIFO puro. Puede limitarse por número de paquetes o de bytes.
 
        pfifo_fast
-              Standard  qdisc  for  'Advanced  Router' enabled kernels. Consists of a three-band queue which honors Type of Service flags, as well as the
-              priority that may be assigned to a packet.
+              Son qdiscs standard para kernels que permiten "Rutador avanzado". Consisten en una cola de tres bandas que satisface flags de tipos de servicio,
+							así como la prioridad que puede ser asignada a un paquete.
 
-       red    Random Early Detection simulates physical congestion by randomly dropping packets when nearing configured bandwidth allocation. Well suited
-              to very large bandwidth applications.
+       red    La "Random Early Detection" (Detención Aleatoria Temprana) simula la congestión física mediante la reducción aleatoria de paquetes cuando se configura
+							la asignación del ancho de banda. Es muy adecuado para las aplicaciones con un ancho de banda muy grande.
 
-       sfq    Stochastic Fairness Queueing reorders queued traffic so each 'session' gets to send a packet in turn.
+       sfq    El "Stochastic Fairness Queueing" (Encolado Estocástico Imparcial) reordena el tráfico encolado, por lo que cada "sesión" logra enviar un paquete.
 
-       tbf    The Token Bucket Filter is suited for slowing traffic down to a precisely configured rate. Scales well to large bandwidths.
+       tbf    El "Token Bucket Filter" (Filtro de Cubetas de Símbolos) es adecuado para bajar lentamente el tráfico hasta una tasa de precisión configurada.
+							Balancéa bien con grandes anchos de banda.
 
-CONFIGURING CLASSLESS QDISCS
+CONFIGURAR QDISCS SIN CLASE
        In the absence of classful qdiscs, classless qdiscs can only be attached at the root of a device. Full syntax:
 
        tc qdisc add dev DEV root QDISC QDISC-PARAMETERS
@@ -99,7 +100,7 @@ CONFIGURING CLASSLESS QDISCS
        The pfifo_fast qdisc is the automatic default in the absence of a configured qdisc.
 
 
-CLASSFUL QDISCS
+QDISCS CON CLASE
        The classful qdiscs are:
 
        CBQ    Class  Based  Queueing  implements a rich linksharing hierarchy of classes.  It contains shaping elements as well as prioritizing capabili‐
