@@ -89,30 +89,28 @@ QDISCS SIN CLASE
 							Balancéa bien con grandes anchos de banda.
 
 CONFIGURAR QDISCS SIN CLASE
-       In the absence of classful qdiscs, classless qdiscs can only be attached at the root of a device. Full syntax:
+       A falta de las qdisc con clase, las qdiscs sin clase pueden sólo ser agregadas en al raíz de un dispositivo. Sintaxis completa:
 
        tc qdisc add dev DEV root QDISC QDISC-PARAMETERS
 
-       To remove, issue
+       Para eliminarlas, poner:
 
        tc qdisc del dev DEV root
 
-       The pfifo_fast qdisc is the automatic default in the absence of a configured qdisc.
-
+       En ausencia de una qdisc configurada, se tomará por defecto una qdisc pfifo_fast.
 
 QDISCS CON CLASE
-       The classful qdiscs are:
+       Las qdisc con clase son:
 
-       CBQ    Class  Based  Queueing  implements a rich linksharing hierarchy of classes.  It contains shaping elements as well as prioritizing capabili‐
-              ties. Shaping is performed using link idle time calculations based on average packet size and underlying link bandwidth. The latter may  be
-              ill-defined for some interfaces.
+       CBQ    El Class Based Queueing (Clase Basada en Colas) implementa una rica jerarquía de clases de enlaces de intercambio. Esta contiene el modelado	de elementos,
+							así como la capacidad de priorizar.	El modelado se realiza mediante el cálculo del tiempo de enlace inactivo basado en el tamaño medio de paquete y el
+							ancho de banda del enlace subyacente.	Este último, puede estar mal definido para algunas interfaces.
 
-       HTB    The  Hierarchy  Token  Bucket  implements a rich linksharing hierarchy of classes with an emphasis on conforming to existing practices. HTB
-              facilitates guaranteeing bandwidth to classes, while also allowing specification of upper limits to inter-class sharing. It contains  shap‐
-              ing elements, based on TBF and can prioritize classes.
+       HTB    El Hierarchy Token Bucket (Cubo de la jerarquía de símbolos) implementa una rica jerarquía de clases de enlaces de intercambio haciendo énfasis en lo acontecido en las prácticas existentes.
+							HTB permite garantizar el ancho de banda de las clases, al mismo tiempo permite la especificación del límite máximo de inter-clases compartidas. Contiene modelado de elementos,
+							basados en TBF y pueden priorizar clases.
 
-       PRIO   The  PRIO qdisc is a non-shaping container for a configurable number of classes which are dequeued in order. This allows for easy prioriti‐
-              zation of traffic, where lower classes are only able to send if higher ones have no packets available. To facilitate configuration, Type Of
-              Service bits are honored by default.
-
+       PRIO   La PRIO qdisc es un contenedor no modelado de un número configurable de clases que son desencoladas en orden. Esto permite una fácil
+							priorización del tráfico, donde las clases más bajas pueden enviar sólo si las más altas tienen paquetes disponibles. Para facilitar la configuración,
+							Los bits del Type of Service (Tipo de Servicio) son satisfechas por defecto.
 
