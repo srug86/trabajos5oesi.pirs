@@ -114,3 +114,165 @@ QDISCS CON CLASE
 							priorización del tráfico, donde las clases más bajas pueden enviar sólo si las más altas tienen paquetes disponibles. Para facilitar la configuración,
 							Los bits del Type of Service (Tipo de Servicio) son satisfechas por defecto.
 
+TEORÍA DE LA ACCIÓN 
+        Las clases forman un árbol, donde cada clase tiene un solo padre. 
+        Una clase puede tener varios hijos. Algunos qdisc permiten además 
+        añadir clases tiempo de ejecución (CBQ, HTB) mientras que otras (PRIO) 
+        se crean con un número estático de los niños.
+
+        Qdisc que permiten la adición dinámica de clases puede tener cero o más
+        subclases en las que el tráfico puede ser en cola. 
+
+        Además, cada clase contiene una qdisc de hojas que por defecto tiene un
+        comportamiento pfifo aunque otra qdisc se puede conectar en su lugar. 
+        Esta qdisc puede volver a tener clases, pero cada clase sólo puede 
+        tener una qdisc hoja. 
+
+        Cuando un paquete entra en una qdisc con clases, se puede clasificar en 
+        una de dichas clases. Tres criterios están disponibles, aunque no todas 
+        las qdisc se usan las tres:
+
+        filtros de tc 
+            Si los filtros de tc se unen a una clase, se les consulta primero 
+            para obtener las instrucciones pertinentes. Los filtros pueden 
+            coincidir en todo los campos de la cabecera del paquete, así como 
+            en la marca del cortafuegos aplicada por ipchains o iptables.
+
+        Tipo de Servicio
+            Algunos qdisc han incluido reglas de clasificación de paquetes 
+            basada ​​en el campo TOS. 
+              
+
+       skb->prioridad 
+              los programas de espacio de usuario puede codificar un 
+              identificador de clase en el campo 'skb->priority' con la opción 
+              SO_PRIORITY. 
+
+       Cada nodo dentro del árbol puede tener sus propios filtros, pero los 
+       filtros de nivel también puede apuntar directamente a las clases bajas. 
+
+       Si la clasificación no tuvo éxito, los paquetes se pondrán en la cola 
+       del nodo qdisc hoja correspondiente a esa clase. No obstante, compruebe 
+       el manual específico de qdisc para más detalles. 
+
+NOMBRADO
+       Todas las qdisc, clases y filtros tienen identificadores, que puede ser 
+        especificados o se asignarán de forma automática. 
+
+       El identificador esta compuesto por un número principal y un número de 
+       menor importancia, separados por dos puntos. 
+
+
+       QDISC    a una qdisc, que potencialmente pueden tener hijos, se le asigna 
+                un número mayor, llamada 'handle', dejando el espacio de 
+                nombres del número de menor importancia disponible para las 
+                clases. El Handel se expresa como '10: '. Se acostumbra a 
+                asignar explícitamente un 'handle' a los qdisc esperan tener 
+                hijos. 
+
+
+       CLASES 
+                Las clases que residen en una parte de un qdisc comparten su 
+                número de mayor importancia, pero cada uno tiene un número de 
+                menor importancia independiente denominado "classid" que no 
+                tiene relación con las clases padre, sólo a sus qdisc padres. 
+                Se aplica la misma forma de nombrado que a los qdisc.
+
+
+       FILTROS 
+                Los filtros tienen la tercera parte del identificador, que sólo
+                es necesario cuando se utiliza un filtro hash jerarquíco. 
+
+UNIDADES 
+        Todos los parámetros aceptan un número de punto flotante, posiblemente 
+        seguido de una unidad. 
+
+       Los anchos de banda o las tasas se pueden especificar en: 
+
+       kbps                     kilobytes por segundo 
+
+       mbps                     megabytes por segundo 
+
+       Kbit                     kilobits por segundo 
+
+       Megabits                 Mbits por segundo 
+
+       bps o un número desnudo  Bytes por segundo 
+
+
+       Las cantidades de datos se puede especificar en: 
+
+       kb o k                   Kilobytes 
+
+       MB o m                   Megabytes 
+
+       mbit                     Megabits
+
+       kbit                     Kilobits
+
+       b o un número desnudo    Bytes. 
+
+       Períodos de tiempo puede ser especificado en: 
+
+       s, sec o secs 
+              segundo 
+
+       ms, msec o msecs 
+              Milisegundos 
+
+       us, usec, usecs o un número desnudo 
+              Microsegundos. 
+
+COMANDOS TC 
+       Los comandos siguientes están disponibles para qdisc, clases y filtros: 
+
+       add  Añade un qdisc, clase o filtro a un nodo. Para todas las entidades,
+            un padre debe ser aprobado, ya sea aprobando su ID o por estar 
+            conectado directamente a la raíz de un dispositivo. 
+            Al crear un qdisc o un filtro, puede ser nombrado con el parametro 
+            'handler'. Una clase se nombra con el parametro 'classid'. 
+
+
+       remove   Un qdisc puede ser removido mediante la especificación de su 
+                'handler', que también puede ser 'root'. Todas las subclases y 
+                sus qdisc node se eliminan automáticamente, así como cualquier 
+                filtro unido a ellos. 
+
+
+       change   Algunas entidades se pueden modificar 'in situ'. Comparte la 
+                sintaxis de 'add', con la excepción de que el 'handler' no se 
+                puede cambiar y no pueden cambiar los padres. En otros 
+                es decir, el cambio no puede mover un nodo. 
+
+
+       replace 
+              Realiza una operación casi atómica (quitar o agregar) sobre un 
+              identificador de nodo existente. Si el nodo no existe aún, se crea. 
+
+
+       link   Sólo disponible para qdisc. Realiza una sustitución donde el nodo
+              debe existir ya.
+
+
+FORMATO 
+       El comando show tiene opciones de formato adicionales: 
+
+
+ -s, -stats, -statistic     muestra más estadísticas sobre el uso de paquetes. 
+
+
+-d, -details                salida de información más detallada sobre las tasas
+                            y tamaños de las casillas. 
+
+
+-r, -raw                    muestra valores de salida hexadecimales en bruto 
+                            para los 'handles'. 
+
+
+-p, -pretty                 decodifica los filtros de offset y valores de la 
+                            máscara en sus equivalentes comandos de filtro 
+                            basados en TCP / IP. 
+
+
+-iec                        muestra las tasas en unidades de IEC (es decir, 
+                            1 K = 1024). 
